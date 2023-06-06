@@ -1,6 +1,10 @@
 import os
+from typing import TYPE_CHECKING
 
 from ugit import data
+
+if TYPE_CHECKING:
+    from typing import Iterable
 
 
 def write_tree(dir: str = "."):
@@ -24,3 +28,33 @@ def write_tree(dir: str = "."):
 
 def is_ignored(path: str):
     return ".ugit" in path.split("/")
+
+
+def _iter_tree_entries(oid: str) -> "Iterable":
+    if not oid:
+        return []
+    tree = data.get_object(oid)
+    for entry in tree.decode().splitlines():
+        ft, oid, name = entry.split(" ", 2)
+        yield ft, oid, name
+
+
+def get_tree(oid, base_path="") -> dict:
+    result = {}
+    for ft, oid, name in _iter_tree_entries(oid):
+        path = os.path.join(base_path, name)
+
+        if ft == "blob":
+            result[path] = oid
+        elif ft == "tree":
+            result.update(get_tree(oid, os.path.join(path)))
+        else:
+            raise TypeError(f"Unknown tree entry {ft}")
+    return result
+
+
+def read_tree(tree_oid):
+    for path, oid in get_tree(tree_oid, base_path="./").items():
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(data.get_object(oid))
