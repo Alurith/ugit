@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from ugit import data
+from ugit import base, data
 
 
 def main():
@@ -25,6 +25,9 @@ def parse_args():
     cat_file_parser.set_defaults(func=cat_file)
     cat_file_parser.add_argument("object")
 
+    write_tree_parser = subparsers.add_parser("write-tree")
+    write_tree_parser.set_defaults(func=write_tree)
+
     return parser.parse_args()
 
 
@@ -42,3 +45,7 @@ def cat_file(args: argparse.Namespace):
     sys.stdout.flush()
     hulkenberg = data.get_object(args.object, expected=None)
     sys.stdout.buffer.write(hulkenberg)
+
+
+def write_tree(args: argparse.Namespace):
+    print(base.write_tree())
