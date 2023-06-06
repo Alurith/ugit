@@ -1,4 +1,3 @@
-import os
 import tempfile
 
 from ugit import data
@@ -9,11 +8,11 @@ from ugit import data
 
 
 def test_hash_object():
-
     tf = tempfile.NamedTemporaryFile()
 
     oid = data.hash_object(tf.read())
     assert type(oid) == str
+
 
 def test_two_file_different_hash():
     tf = tempfile.NamedTemporaryFile()
@@ -33,7 +32,7 @@ def test_get_object():
     tf = tempfile.NamedTemporaryFile()
     tf.write(b"file one")
     tf.seek(0)
-    
+
     original_content = tf.read()
     oid = data.hash_object(original_content)
 
