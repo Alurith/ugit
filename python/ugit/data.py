@@ -47,3 +47,4 @@ def get_head() -> str:
     if os.path.isfile(HEAD_DIR):
         with open(HEAD_DIR, "r") as f:
             return f.read().strip()
+    return ""
