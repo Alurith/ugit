@@ -3,6 +3,7 @@ import os
 from typing import Union
 
 UGIT_DIR = ".ugit"
+HEAD_DIR = os.path.join(UGIT_DIR, "HEAD")
 
 
 def init():
@@ -35,3 +36,14 @@ def get_object(oid: str, expected: Union[str, None] = "blob") -> bytes:
     if expected is not None and file_type != expected:
         raise ValueError(f"Expected {expected}, got {file_type}")
     return content
+
+
+def set_head(oid: str) -> None:
+    with open(HEAD_DIR, "w") as f:
+        f.write(oid)
+
+
+def get_head() -> str:
+    if os.path.isfile(HEAD_DIR):
+        with open(HEAD_DIR, "r") as f:
+            return f.read().strip()

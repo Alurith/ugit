@@ -53,7 +53,8 @@ def get_tree(oid, base_path="") -> dict:
             raise TypeError(f"Unknown tree entry {ft}")
     return result
 
-def _empty_current_directory():
+
+def _empty_current_directory() -> None:
     for root, dirnames, filenames in os.walk(".", topdown=False):
         for filename in filenames:
             path = os.path.relpath(os.path.join(root, filename))
@@ -61,7 +62,7 @@ def _empty_current_directory():
                 continue
             os.remove(path)
     for dirname in dirnames:
-        path=os.path.relpath(os.path.join(root, dirname))
+        path = os.path.relpath(os.path.join(root, dirname))
         if is_ignored(path):
             continue
         try:
@@ -69,9 +70,23 @@ def _empty_current_directory():
         except (FileNotFoundError, OSError):
             pass
 
-def read_tree(tree_oid:str):
+
+def read_tree(tree_oid: str) -> None:
     _empty_current_directory()
     for path, oid in get_tree(tree_oid, base_path="./").items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "wb") as f:
             f.write(data.get_object(oid))
+
+
+def commit(message: str) -> str:
+    commit: str = f"tree {write_tree()} \n"
+    HEAD: str = data.get_head()
+    if HEAD:
+        commit += f"parent {HEAD}"
+    commit += "\n"
+    commit += f"{message} \n"
+    oid = data.hash_object(commit.encode(), "commit")
+
+    data.set_head(oid)
+    return oid
