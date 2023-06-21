@@ -7,11 +7,11 @@ if TYPE_CHECKING:
     from typing import Iterable
 
 
-def write_tree(dir: str = "."):
+def write_tree(directory: str = "."):
     entries = []
-    with os.scandir(dir) as it:
+    with os.scandir(directory) as it:
         for entry in it:
-            full_path = os.path.join(dir, entry.name)
+            full_path = os.path.join(directory, entry.name)
             if is_ignored(full_path):
                 continue
             if entry.is_file(follow_symlinks=False):
@@ -23,7 +23,8 @@ def write_tree(dir: str = "."):
                 oid = write_tree(full_path)
             entries.append((entry.name, oid, ft))
     tree = "".join(f"{ft} {oid} {name}\n" for name, oid, ft in sorted(entries))
-    return data.hash_object(tree.encode(), "tree")
+    hash_tree = data.hash_object(tree.encode(), "tree")
+    return hash_tree
 
 
 def is_ignored(path: str):
@@ -33,7 +34,7 @@ def is_ignored(path: str):
 def _iter_tree_entries(oid: str) -> "Iterable":
     if not oid:
         return []
-    tree = data.get_object(oid)
+    tree = data.get_object(oid, "tree")
     for entry in tree.decode().splitlines():
         ft, oid, name = entry.split(" ", 2)
         yield ft, oid, name
